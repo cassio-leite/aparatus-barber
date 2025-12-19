@@ -4,7 +4,7 @@ export const PageContainer = ({ children }: { children: React.ReactNode }) => {
 
 export const PageSectionTitle = ({ children }: { children: string }) => {
   return (
-    <h2 className="text-foreground text-xs font-semibold uppercase">
+    <h2 className="text-foreground text-xs font-bold uppercase">
       {children}
     </h2>
   );
