@@ -26,3 +26,4 @@ Tecnologias utilizadas:
 - **SEMPRE** use os componentes @app\_components\footer.tsx e @app\_components\header.tsx na hora de criar headers e footers. **NUNCA** os crie manualmente.
 - **EVITE** ao máximo duplicidade de código. Ao repetir um código, crie componentes e/ ou funções utilitárias.
 - Ao usar Figma MCP, **SEMPRE** seja 100% fiel ao Figma **CUSTE O QUE CUSTAR**.
+- Todo scroll horizontal **DEVE SEMPRE** esconder a barra de scroll usando className="[&::-webkit-scrollbar]:hidden"

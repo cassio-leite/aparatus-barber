@@ -104,7 +104,11 @@ const BarbershopPage = async ({ params }: BarbershopPageProps) => {
           <PageSectionTitle>SERVIÇOS</PageSectionTitle>
           <div className="flex flex-col gap-3">
             {barbershop.services.map((service) => (
-              <ServiceItem key={service.id} service={service} />
+              <ServiceItem
+                key={service.id}
+                service={service}
+                barbershop={barbershop}
+              />
             ))}
           </div>
         </PageSection>
