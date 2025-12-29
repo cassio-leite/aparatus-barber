@@ -34,9 +34,9 @@ const BarbershopPage = async ({ params }: BarbershopPageProps) => {
   }
 
   return (
-    <main>
+    <main className="overflow-x-hidden">
       {/* Hero Section */}
-      <div className="relative h-[297px] w-full">
+      <div className="relative h-[297px] w-full overflow-hidden">
         <Image
           src={barbershop.imageUrl}
           alt={barbershop.name}
@@ -44,19 +44,19 @@ const BarbershopPage = async ({ params }: BarbershopPageProps) => {
           className="object-cover"
         />
         {/* Botão de voltar */}
-        <div className="absolute top-5 left-5 z-10">
+        <div className="absolute top-4 left-4 z-10">
           <Link href="/">
             <Button
               variant="secondary"
               size="icon"
-              className="bg-background hover:bg-background/90 h-10 w-10 rounded-full"
+              className="bg-background hover:bg-background/90 h-10 w-10 shrink-0 rounded-full"
             >
               <ChevronLeft className="size-4" />
             </Button>
           </Link>
         </div>
         {/* Fundo branco arredondado sobrepondo */}
-        <div className="bg-background absolute right-0 bottom-0 left-0 rounded-t-[20px]" />
+        <div className="bg-background absolute right-0 bottom-0 left-0 h-[20px] rounded-t-[20px]" />
       </div>
 
       <PageContainer>
@@ -102,7 +102,7 @@ const BarbershopPage = async ({ params }: BarbershopPageProps) => {
         {/* Seção "SERVIÇOS" */}
         <PageSection>
           <PageSectionTitle>SERVIÇOS</PageSectionTitle>
-          <div className="flex flex-col gap-3">
+          <div className="flex w-full flex-col gap-3">
             {barbershop.services.map((service) => (
               <ServiceItem
                 key={service.id}

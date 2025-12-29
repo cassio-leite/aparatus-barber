@@ -18,6 +18,9 @@ import { Separator } from "./ui/separator";
 import { X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useAction } from "next-safe-action/hooks";
+import { createBooking } from "../_actions/creat-booking";
+import { toast } from "sonner";
 
 interface ServiceItemProps {
   service: BarbershopServiceModel;
@@ -30,6 +33,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
   const [selectedTime, setSelectedTime] = useState<string | undefined>(
     undefined,
   );
+  const { executeAsync, isPending } = useAction(createBooking);
 
   const formatPrice = (priceInCents: number) => {
     // Converter centavos para reais com centavos (R$50,00)
@@ -75,6 +79,8 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     setSelectedTime(undefined);
   };
 
+  const isConfirmDisabled = !selectedDate || !selectedTime;
+
   // Obter data de hoje sem hora (apenas data)
   const getTodayDate = () => {
     const today = new Date();
@@ -84,9 +90,35 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
 
   const timeSlots = generateTimeSlots();
 
+  const handleConfirm = async () => {
+    if (!selectedTime || !selectedDate) {
+      return;
+    }
+    const timeSplitted = selectedTime.split(":");
+    const hours = timeSplitted[0];
+    const minutes = timeSplitted[1];
+    const date = new Date(selectedDate);
+    date.setHours(Number(hours), Number(minutes));
+    
+      const result = await executeAsync({
+        serviceId: service.id,
+        date,
+      });
+
+      if (result.serverError || result.validationErrors) {
+        toast.error(result.validationErrors?._errors?.[0]);
+        return;
+      }
+      toast.success("Agendamento criado com sucesso!");
+      setSelectedDate(undefined);
+      setSelectedTime(undefined);
+      setIsSheetOpen(false);
+    
+  };
+
   return (
     <>
-      <Card className="flex flex-row items-center gap-3 p-4 shadow-none">
+      <Card className="flex min-w- flex-row items-center gap-3 p-4 shadow-none">
         {/* Imagem à esquerda */}
         <div className="relative size-[110px] shrink-0 overflow-hidden rounded-[10px]">
           <Image
@@ -97,23 +129,21 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
           />
         </div>
         {/* Conteúdo à direita */}
-        <div className="flex flex-1 flex-col justify-between gap-2">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-foreground text-sm font-bold">
+        <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+          <div className="flex min-w-0 flex-col gap-1">
+            <h3 className="text-foreground truncate text-sm font-bold">
               {service.name}
             </h3>
-            <p className="text-muted-foreground text-xs leading-relaxed">
+            <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
               {service.description}
             </p>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-foreground text-sm font-bold">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-foreground shrink-0 text-sm font-bold">
               {formatPrice(service.priceInCents)}
             </span>
             <Button
-              variant="default"
-              size="sm"
-              className="h-8 rounded-md px-4"
+              className="rounded-full px-4 py-2"
               onClick={() => setIsSheetOpen(true)}
             >
               Reservar
@@ -142,7 +172,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
           </SheetHeader>
 
           {/* Conteúdo Principal */}
-          <div className="flex flex-1 flex-col overflow-y-auto px-5 py-6">
+          <div className="flex flex-1 flex-col overflow-y-auto px-5 py-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* Calendário */}
             <div className="mb-6">
               <Calendar
@@ -236,13 +266,9 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
           <SheetFooter className="border-t px-5 py-4">
             <Button
               variant="default"
-              className="h-11 w-full rounded-lg"
-              disabled={!selectedDate || !selectedTime}
-              onClick={() => {
-                // Por enquanto apenas fecha o Sheet
-                // Futuro: implementar lógica de confirmação
-                handleSheetOpenChange(false);
-              }}
+              className="w-full rounded-full"
+              disabled={isConfirmDisabled || isPending}
+              onClick={handleConfirm}
             >
               Confirmar
             </Button>
