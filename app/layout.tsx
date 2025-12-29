@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "./_components/ui/sonner";
+import QueryProvider from "./_providers/query-provider";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -21,8 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${plusJakartaSans.variable} font-sans antialiased [&::-webkit-scrollbar]:hidden`}>
+        <QueryProvider>
         {children}
         <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );

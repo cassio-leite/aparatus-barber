@@ -21,6 +21,8 @@ import { ptBR } from "date-fns/locale";
 import { useAction } from "next-safe-action/hooks";
 import { createBooking } from "../_actions/creat-booking";
 import { toast } from "sonner";
+import { getDateAvailableTimeSlots } from "../_actions/get-date-available-time-slots";
+import { useQuery } from "@tanstack/react-query";
 
 interface ServiceItemProps {
   service: BarbershopServiceModel;
@@ -33,6 +35,16 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
   const [selectedTime, setSelectedTime] = useState<string | undefined>(
     undefined,
   );
+  const { data: availableTimeSlots } = useQuery({
+    queryKey: ["date-available-time-slots", service.barbershopId, selectedDate],
+    queryFn: () =>
+      getDateAvailableTimeSlots({
+        barbershopId: service.barbershopId,
+        date: selectedDate!,
+      }),
+    enabled: Boolean(selectedDate),
+  });
+
   const { executeAsync, isPending } = useAction(createBooking);
 
   const formatPrice = (priceInCents: number) => {
@@ -46,19 +58,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     }).format(priceInReais);
   };
 
-  const generateTimeSlots = () => {
-    const slots: string[] = [];
-    for (let hour = 9; hour < 18; hour++) {
-      // Horários de 15 em 15 minutos
-      slots.push(`${hour.toString().padStart(2, "0")}:00`);
-      slots.push(`${hour.toString().padStart(2, "0")}:15`);
-      slots.push(`${hour.toString().padStart(2, "0")}:30`);
-      slots.push(`${hour.toString().padStart(2, "0")}:45`);
-    }
-    // Adicionar 18:00 como último horário
-    slots.push("18:00");
-    return slots;
-  };
+
 
   const formatDate = (date: Date) => {
     return format(date, "dd 'de' MMMM", { locale: ptBR });
@@ -88,7 +88,6 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     return today;
   };
 
-  const timeSlots = generateTimeSlots();
 
   const handleConfirm = async () => {
     if (!selectedTime || !selectedDate) {
@@ -99,26 +98,25 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     const minutes = timeSplitted[1];
     const date = new Date(selectedDate);
     date.setHours(Number(hours), Number(minutes));
-    
-      const result = await executeAsync({
-        serviceId: service.id,
-        date,
-      });
 
-      if (result.serverError || result.validationErrors) {
-        toast.error(result.validationErrors?._errors?.[0]);
-        return;
-      }
-      toast.success("Agendamento criado com sucesso!");
-      setSelectedDate(undefined);
-      setSelectedTime(undefined);
-      setIsSheetOpen(false);
-    
+    const result = await executeAsync({
+      serviceId: service.id,
+      date,
+    });
+
+    if (result.serverError || result.validationErrors) {
+      toast.error(result.validationErrors?._errors?.[0]);
+      return;
+    }
+    toast.success("Agendamento criado com sucesso!");
+    setSelectedDate(undefined);
+    setSelectedTime(undefined);
+    setIsSheetOpen(false);
   };
 
   return (
     <>
-      <Card className="flex min-w- flex-row items-center gap-3 p-4 shadow-none">
+      <Card className="min-w- flex flex-row items-center gap-3 p-4 shadow-none">
         {/* Imagem à esquerda */}
         <div className="relative size-[110px] shrink-0 overflow-hidden rounded-[10px]">
           <Image
@@ -180,7 +178,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                 selected={selectedDate}
                 onSelect={handleDateSelect}
                 disabled={{ before: getTodayDate() }}
-                className="rounded-md [&_.rdp-button[data-selected-single='true']]:rounded-md"
+                className="w-full p-0"
                 locale={ptBR}
               />
             </div>
@@ -201,7 +199,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                   </h3>
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {timeSlots.map((time) => (
+                  {availableTimeSlots?.data?.map((time) => (
                     <Button
                       key={time}
                       variant={selectedTime === time ? "default" : "outline"}
