@@ -19,7 +19,7 @@ import { X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAction } from "next-safe-action/hooks";
-import { createBooking } from "../_actions/creat-booking";
+import { createBooking } from "../_actions/create-booking";
 import { toast } from "sonner";
 import { getDateAvailableTimeSlots } from "../_actions/get-date-available-time-slots";
 import { useQuery } from "@tanstack/react-query";
