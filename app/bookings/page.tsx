@@ -38,6 +38,9 @@ const BookingsPage = async () => {
               {confirmedBookings.map((booking) => (
                 <BookingItem
                   key={booking.id}
+                  bookingId={booking.id}
+                  service={booking.service || undefined}
+                  barbershop={booking.barbershop || undefined}
                   serviceName={
                     booking.service?.name || "Serviço não encontrado"
                   }
@@ -61,6 +64,9 @@ const BookingsPage = async () => {
               {finishedBookings.map((booking) => (
                 <BookingItem
                   key={booking.id}
+                  bookingId={booking.id}
+                  service={booking.service || undefined}
+                  barbershop={booking.barbershop || undefined}
                   serviceName={
                     booking.service?.name || "Serviço não encontrado"
                   }
